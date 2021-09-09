@@ -37,6 +37,7 @@ def tokenize(text):
     clean_tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return clean_tokens
 
+# not used, template provided with lesson
 def tokenize_provided(text):
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
@@ -66,6 +67,10 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
+    # visualize class imbalance in the training set
+    tag_counts = df.loc[:,'related':].sum().sort_values(ascending=False)
+    tag_names = list(tag_counts.index)
+
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -84,6 +89,24 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=tag_names,
+                    y=tag_counts
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Tags',
+                'yaxis': {
+                    'title': 'Count'
+                },
+                'xaxis': {
+                    'title': 'Tags'
                 }
             }
         }

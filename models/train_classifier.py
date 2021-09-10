@@ -16,6 +16,7 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 
 # evaluate model
 from sklearn.metrics import classification_report
@@ -78,8 +79,8 @@ def tokenize(text):
     clean_tokens = [lemmatizer.lemmatize(word) for word in tokens]
     return clean_tokens
 
-
-def build_model():
+# model without grid search
+def build_model_no_cv():
     """Build and return the predefined model pipeline for multi-label
     classification.
     """
@@ -93,6 +94,30 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
     return pipeline
+
+# model with grid search
+def build_model():
+    """Build and return the predefined model pipeline for multi-label
+    classification.
+    """
+
+    pipeline = Pipeline([
+        ('features', Pipeline([
+            ('vect', CountVectorizer(tokenizer=tokenize)),
+            ('tfidf', TfidfTransformer())
+        ])),
+
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    parameters = {
+        'features__vect__ngram_range': ((1, 1), (1, 2)),
+        'features__vect__max_features': (None, 5000, 10000)
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
